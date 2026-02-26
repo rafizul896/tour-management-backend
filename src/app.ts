@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { router } from "./app/routes/indes";
+import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 
 const app = express();
 app.use(express.json());
@@ -14,5 +15,7 @@ app.get("/", (req: Request, res: Response) => {
     message: "Tour Management server is running..!",
   });
 });
+
+app.use(globalErrorHandler);
 
 export default app;
