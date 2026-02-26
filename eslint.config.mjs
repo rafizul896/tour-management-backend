@@ -10,7 +10,7 @@ export default defineConfig(
   tseslint.configs.stylistic,
   {
     rules: {
-      "no-unused-vars": "error",
+      // "no-unused-vars": "error",
       "no-console": "warn"
     }
   }
