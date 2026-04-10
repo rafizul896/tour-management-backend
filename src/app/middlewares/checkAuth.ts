@@ -9,6 +9,7 @@ const checkAuth =
   (...authRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.headers.authorization;
+
     const verifiedToken = verifyToken(
       accessToken as string,
       envVars.JWT_ACCESS_SECRET,
