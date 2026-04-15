@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { UserControllers } from "./user.controller";
 import validateRequest from "../../utils/validateRequest";
-import { userSchema } from "./user.validation";
+import { updateUserSchema, userSchema } from "./user.validation";
 import checkAuth from "../../middlewares/checkAuth";
 import { Role } from "./user.interface";
 const router = Router();
@@ -11,9 +11,10 @@ router.post(
   validateRequest(userSchema),
   UserControllers.createUser,
 );
-router.get("/", checkAuth(Role.USER), UserControllers.getAllUsers);
+router.get("/", checkAuth(...Object.values(Role)), UserControllers.getAllUsers);
 router.patch(
   "/:id",
+  validateRequest(updateUserSchema),
   checkAuth(...Object.values(Role)),
   UserControllers.updateUser,
 );
