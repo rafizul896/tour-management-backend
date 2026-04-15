@@ -26,6 +26,8 @@ const checkAuth =
       );
     }
 
+    req.user = verifiedToken;
+
     next();
   };
 
