@@ -43,6 +43,10 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
 };
 
 const getNewAccessToken = async (refreshToken: string) => {
+if(!refreshToken){
+  throw new AppError(httpStatus.BAD_REQUEST, "Refresh token is not found from cookies")
+}
+
   const verifiedRefeshToken = verifyToken(
     refreshToken,
     envVars.JWT_REFRESH_SECRET,

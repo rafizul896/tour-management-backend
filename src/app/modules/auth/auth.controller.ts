@@ -7,6 +7,16 @@ import httpStatus from "http-status-codes";
 const credentialsLogin = catchAsync(async (req, res, next) => {
   const logInfo = await AuthServices.credentialsLogin(req.body);
 
+  res.cookie("accessToken", logInfo.accessToken, {
+    httpOnly: true,
+    secure: false,
+  });
+
+  res.cookie("refreshToken", logInfo.refreshToken, {
+    httpOnly: true,
+    secure: false,
+  });
+
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
@@ -16,7 +26,7 @@ const credentialsLogin = catchAsync(async (req, res, next) => {
 });
 
 const getNewAccessToken = catchAsync(async (req, res, next) => {
-  const refreshToken = req.cookies?.refreshToken
+  const refreshToken = req.cookies?.refreshToken;
   const tokenInfo = await AuthServices.getNewAccessToken(refreshToken);
 
   sendResponse(res, {
@@ -29,5 +39,5 @@ const getNewAccessToken = catchAsync(async (req, res, next) => {
 
 export const AuthControllers = {
   credentialsLogin,
-  getNewAccessToken
+  getNewAccessToken,
 };
