@@ -43,9 +43,12 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
 };
 
 const getNewAccessToken = async (refreshToken: string) => {
-if(!refreshToken){
-  throw new AppError(httpStatus.BAD_REQUEST, "Refresh token is not found from cookies")
-}
+  if (!refreshToken) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Refresh token is not found from cookies",
+    );
+  }
 
   const verifiedRefeshToken = verifyToken(
     refreshToken,
@@ -58,7 +61,10 @@ if(!refreshToken){
     throw new AppError(httpStatus.NOT_FOUND, "User doesn't exist");
   }
 
-  if (isUserExist.isActive === IsActive.BLOCKED || IsActive.INACTIVE) {
+  if (
+    isUserExist.isActive === IsActive.BLOCKED ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
     throw new AppError(
       httpStatus.BAD_GATEWAY,
       `User is ${isUserExist.isActive}`,
@@ -81,7 +87,7 @@ if(!refreshToken){
     envVars.JWT_ACCESS_EXPIRES,
   );
 
-  return accessToken;
+  return { accessToken };
 };
 
 export const AuthServices = {
