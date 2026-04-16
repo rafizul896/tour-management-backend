@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import AppError from "../../errorHelpers/AppError";
 import { IsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
@@ -90,7 +91,33 @@ const getNewAccessToken = async (refreshToken: string) => {
   return { accessToken };
 };
 
+const changePassword = async (
+  decodedToken: JwtPayload,
+  payload: { oldPassword: string; newPassword: string },
+) => {
+  const user = await User.findOne({ email: decodedToken.email });
+
+  const isPasswordMatch = bcrypt.compareSync(
+    payload.oldPassword,
+    user?.password as string,
+  );
+
+  if (!isPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Incorrect old Password");
+  }
+
+  user!.password = bcrypt.hashSync(
+    payload.newPassword,
+    Number(envVars.BCRYPT_SALT_ROUND),
+  );
+
+  user?.save();
+
+  return true;
+};
+
 export const AuthServices = {
   credentialsLogin,
   getNewAccessToken,
+  changePassword,
 };

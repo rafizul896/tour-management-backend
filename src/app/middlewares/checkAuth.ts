@@ -4,6 +4,8 @@ import { envVars } from "../config/env";
 import { JwtPayload } from "jsonwebtoken";
 import AppError from "../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
+import { User } from "../modules/user/user.model";
+import { IsActive } from "../modules/user/user.interface";
 
 const checkAuth =
   (...authRoles: string[]) =>
@@ -17,6 +19,28 @@ const checkAuth =
 
     if (!verifiedToken) {
       throw new AppError(httpStatus.FORBIDDEN, "You are Not Authorized");
+    }
+
+    const isUserExist = await User.findOne({
+      email: verifiedToken.email,
+    });
+
+    if (!isUserExist) {
+      throw new AppError(httpStatus.NOT_FOUND, "User doesn't exist");
+    }
+
+    if (
+      isUserExist.isActive === IsActive.BLOCKED ||
+      isUserExist.isActive === IsActive.INACTIVE
+    ) {
+      throw new AppError(
+        httpStatus.BAD_GATEWAY,
+        `User is ${isUserExist.isActive}`,
+      );
+    }
+
+    if (isUserExist.isDeleted) {
+      throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
     }
 
     if (!authRoles.includes(verifiedToken.role)) {
