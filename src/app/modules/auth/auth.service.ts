@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import AppError from "../../errorHelpers/AppError";
 import { IsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
@@ -43,6 +44,13 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
 };
 
 const getNewAccessToken = async (refreshToken: string) => {
+  if (!refreshToken) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Refresh token is not found from cookies",
+    );
+  }
+
   const verifiedRefeshToken = verifyToken(
     refreshToken,
     envVars.JWT_REFRESH_SECRET,
@@ -54,7 +62,10 @@ const getNewAccessToken = async (refreshToken: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "User doesn't exist");
   }
 
-  if (isUserExist.isActive === IsActive.BLOCKED || IsActive.INACTIVE) {
+  if (
+    isUserExist.isActive === IsActive.BLOCKED ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
     throw new AppError(
       httpStatus.BAD_GATEWAY,
       `User is ${isUserExist.isActive}`,
@@ -77,10 +88,36 @@ const getNewAccessToken = async (refreshToken: string) => {
     envVars.JWT_ACCESS_EXPIRES,
   );
 
-  return accessToken;
+  return { accessToken };
+};
+
+const changePassword = async (
+  decodedToken: JwtPayload,
+  payload: { oldPassword: string; newPassword: string },
+) => {
+  const user = await User.findOne({ email: decodedToken.email });
+
+  const isPasswordMatch = bcrypt.compareSync(
+    payload.oldPassword,
+    user?.password as string,
+  );
+
+  if (!isPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Incorrect old Password");
+  }
+
+  user!.password = bcrypt.hashSync(
+    payload.newPassword,
+    Number(envVars.BCRYPT_SALT_ROUND),
+  );
+
+  user?.save();
+
+  return true;
 };
 
 export const AuthServices = {
   credentialsLogin,
   getNewAccessToken,
+  changePassword,
 };
