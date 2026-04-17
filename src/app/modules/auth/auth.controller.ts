@@ -4,6 +4,10 @@ import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import httpStatus from "http-status-codes";
+import { generateToken } from "../../utils/jwt";
+import AppError from "../../errorHelpers/AppError";
+import { envVars } from "../../config/env";
+import { IUser } from "../user/user.interface";
 
 const credentialsLogin = catchAsync(async (req, res, next) => {
   const logInfo = await AuthServices.credentialsLogin(req.body);
@@ -77,9 +81,22 @@ const changePassword = catchAsync(async (req, res, next) => {
   });
 });
 
+const googleCallback = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  const callBack = await AuthServices.googleCallback(user, res);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Logged with google successfully",
+    data: callBack,
+  });
+});
+
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
   logout,
   changePassword,
+  googleCallback,
 };

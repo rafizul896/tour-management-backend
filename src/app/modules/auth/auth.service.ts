@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { generateToken, verifyToken } from "../../utils/jwt";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import { Response } from "express";
 
 const credentialsLogin = async (payload: Partial<IUser>) => {
   const { email } = payload;
@@ -116,8 +117,48 @@ const changePassword = async (
   return true;
 };
 
+const googleCallback = async (
+  user: Partial<IUser | undefined>,
+  res: Response,
+) => {
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+
+  const jwtPayload = {
+    userId: user?._id,
+    email: user?.email,
+    role: user?.role,
+  };
+
+  const accessToken = generateToken(
+    jwtPayload,
+    envVars.JWT_ACCESS_SECRET,
+    envVars.JWT_ACCESS_EXPIRES,
+  );
+
+  const refreshToken = generateToken(
+    jwtPayload,
+    envVars.JWT_REFRESH_SECRET,
+    envVars.JWT_REFRESH_EXPIRES,
+  );
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: false,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+  });
+
+  return;
+};
+
 export const AuthServices = {
   credentialsLogin,
   getNewAccessToken,
   changePassword,
+  googleCallback,
 };
