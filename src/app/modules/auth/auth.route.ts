@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response, Router } from "express";
 import { AuthControllers } from "./auth.controller";
 import checkAuth from "../../middlewares/checkAuth";
@@ -16,9 +17,13 @@ router.patch(
 );
 router.get(
   "/google",
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate("google", { scope: ["profile", "email"] })(req, res);
+    const redirect = req.query.redirect || "/";
+
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state: redirect as string,
+    })(req, res);
   },
 );
 

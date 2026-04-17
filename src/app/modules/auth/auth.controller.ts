@@ -82,15 +82,16 @@ const changePassword = catchAsync(async (req, res, next) => {
 });
 
 const googleCallback = catchAsync(async (req, res, next) => {
-  const user = req.user;
-  const callBack = await AuthServices.googleCallback(user, res);
+  let redirectTo = req.query.state ? (req.query.state as string) : "";
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Logged with google successfully",
-    data: callBack,
-  });
+  if (redirectTo.startsWith("/")) {
+    redirectTo = redirectTo.slice(1);
+  }
+
+  const user = req.user;
+  
+  await AuthServices.googleCallback(user, res);
+  res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
 });
 
 export const AuthControllers = {
