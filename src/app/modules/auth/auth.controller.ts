@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { JwtPayload } from "jsonwebtoken";
 import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
@@ -64,9 +65,9 @@ const logout = catchAsync(async (req, res, next) => {
 });
 
 const changePassword = catchAsync(async (req, res, next) => {
-  const decodedToken = req.user;
+  const decodedToken = req.user as JwtPayload;
   const data = req.body;
-  const change = await AuthServices.changePassword(decodedToken,data);
+  const change = await AuthServices.changePassword(decodedToken, data);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
