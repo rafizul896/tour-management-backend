@@ -10,6 +10,7 @@ export const globalErrorHandler = (
   next: NextFunction,
 ) => {
   let statusCode = 500;
+  const errorSources: any = [];
   let message = err.message || "Something went wrong!";
 
   if (err.code === 11000) {
@@ -19,6 +20,17 @@ export const globalErrorHandler = (
   } else if (err.name === "CastError") {
     statusCode = 400;
     message = "Invaild MongoDB ObjectId";
+  } else if (err.name === "ValidationError") {
+    statusCode = 400;
+
+    const errors = Object.values(err.errors);
+    errors.forEach((errObj: any) =>
+      errorSources.push({ path: errObj.path, message: errObj.message }),
+    );
+
+    console.log(errorSources);
+
+    message = "Validation error occurred";
   } else if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
@@ -30,6 +42,7 @@ export const globalErrorHandler = (
   res.status(statusCode).json({
     success: false,
     message: message || err?.message,
+    errorSources,
     err,
     stack: envVars.NODE_ENV === "development" ? err?.stack : null,
   });
