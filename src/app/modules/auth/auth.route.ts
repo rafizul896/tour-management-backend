@@ -23,7 +23,7 @@ router.get(
     passport.authenticate("google", {
       scope: ["profile", "email"],
       state: redirect as string,
-    })(req, res);
+    })(req, res, next);
   },
 );
 
