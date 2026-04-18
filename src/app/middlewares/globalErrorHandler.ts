@@ -13,6 +13,7 @@ export const globalErrorHandler = (
   const errorSources: any = [];
   let message = err.message || "Something went wrong!";
 
+  // Mongoose Error
   if (err.code === 11000) {
     const doplicate = err.errmsg.match(/"([^"]*)"/);
     statusCode = 400;
@@ -22,16 +23,27 @@ export const globalErrorHandler = (
     message = "Invaild MongoDB ObjectId";
   } else if (err.name === "ValidationError") {
     statusCode = 400;
-
     const errors = Object.values(err.errors);
+
     errors.forEach((errObj: any) =>
       errorSources.push({ path: errObj.path, message: errObj.message }),
     );
+    message = "Validation Error";
+  }
+  // Zod Error
+  else if (err.name === "ZodError") {
+    statusCode = 400;
+    message = "ZodError";
 
-    console.log(errorSources);
-
-    message = "Validation error occurred";
-  } else if (err instanceof AppError) {
+    err.issues.forEach((errObj: any) =>
+      errorSources.push({
+        path: errObj.path[errObj.path.length - 1],
+        message: errObj.message,
+      }),
+    );
+  }
+  // App Error
+  else if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
   } else if (err instanceof Error) {
