@@ -17,20 +17,20 @@ const createDivision = async (payload: IDivision) => {
   return division;
 };
 
-const getAllDivision = async (payload: IDivision) => {
+const getAllDivision = async () => {
+  //
+};
+
+const getSingleDivision = async (id: string) => {
+  console.log(id);
+};
+
+const updateDivision = async (id: string, payload: Partial<IDivision>) => {
   console.log(payload);
 };
 
-const getSingleDivision = async (payload: IDivision) => {
-  console.log(payload);
-};
-
-const updateDivision = async (payload: IDivision) => {
-  console.log(payload);
-};
-
-const deleteDivision = async (payload: IDivision) => {
-  console.log(payload);
+const deleteDivision = async (id: string) => {
+  console.log(id);
 };
 
 export const DivisionService = {
