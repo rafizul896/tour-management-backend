@@ -4,10 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import httpStatus from "http-status-codes";
-import { generateToken } from "../../utils/jwt";
-import AppError from "../../errorHelpers/AppError";
 import { envVars } from "../../config/env";
-import { IUser } from "../user/user.interface";
 
 const credentialsLogin = catchAsync(async (req, res, next) => {
   const logInfo = await AuthServices.credentialsLogin(req.body);
