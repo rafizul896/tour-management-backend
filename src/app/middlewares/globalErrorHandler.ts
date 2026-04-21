@@ -13,6 +13,10 @@ export const globalErrorHandler = (
   const errorSources: any = [];
   let message = err.message || "Something went wrong!";
 
+  if (envVars.NODE_ENV === "development") {
+    console.log(err);
+  }
+
   // Mongoose Error
   if (err.code === 11000) {
     const doplicate = err.errmsg.match(/"([^"]*)"/);
@@ -55,7 +59,7 @@ export const globalErrorHandler = (
     success: false,
     message: message || err?.message,
     errorSources,
-    err,
+    err: envVars.NODE_ENV === "development" ? err : null,
     stack: envVars.NODE_ENV === "development" ? err?.stack : null,
   });
 
