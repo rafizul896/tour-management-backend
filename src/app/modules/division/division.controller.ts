@@ -28,7 +28,7 @@ const getAllDivision = catchAsync(async (req, res, next) => {
 });
 
 const getSingleDivision = catchAsync(async (req, res, next) => {
-    const slug = req.params.slug as string
+  const slug = req.params.id as string;
   const data = await DivisionService.getSingleDivision(slug);
 
   sendResponse(res, {
@@ -40,9 +40,9 @@ const getSingleDivision = catchAsync(async (req, res, next) => {
 });
 
 const updateDivision = catchAsync(async (req, res, next) => {
-    const id = req.params.id as string;
-    const payload = req.body;
-  const data = await DivisionService.updateDivision(id,payload);
+  const id = req.params.id as string;
+  const payload = req.body;
+  const data = await DivisionService.updateDivision(id, payload);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

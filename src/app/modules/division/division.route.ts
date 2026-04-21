@@ -21,12 +21,12 @@ router.get("/:id", DivisionControllers.getSingleDivision);
 router.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validateRequest(updateDivisionValidationSchema),
   DivisionControllers.updateDivision,
 );
 router.delete(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  validateRequest(updateDivisionValidationSchema),
   DivisionControllers.deleteDivision,
 );
 
