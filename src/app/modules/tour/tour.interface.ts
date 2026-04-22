@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface ITour {
-  name: string;
+  title: string;
   slug: string;
   description?: string;
   images?: string[];
@@ -12,9 +12,13 @@ export interface ITour {
   included?: string[];
   excluded?: string[];
   amenities?: string[];
-  tourPlan?: string;
+  tourPlan?: string[];
   maxGuest?: number;
   minAge?: number;
   division: Types.ObjectId;
   tourType: Types.ObjectId;
+}
+
+export interface ITourType{
+  name: string
 }
