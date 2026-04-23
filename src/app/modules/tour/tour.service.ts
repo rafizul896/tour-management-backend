@@ -1,0 +1,100 @@
+import AppError from "../../errorHelpers/AppError";
+import { ITour, ITourType } from "./tour.interface";
+import { Tour, TourType } from "./tour.model";
+import httpStatus from "http-status-codes";
+
+// --- For TourType --- //
+const createTourType = async (payload: ITourType) => {
+  const isExisTourType = await TourType.findOne({ name: payload.name });
+
+  if (isExisTourType) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Tour type is already exists");
+  }
+
+  return await TourType.create(payload);
+};
+
+const getAllTourTypes = async () => {
+  return await TourType.find();
+};
+
+const updateTourType = async (id: string, payload: ITourType) => {
+  const isExisTourType = await TourType.findById(id);
+
+  if (!isExisTourType) {
+    throw new Error("Tour type is not founded!");
+  }
+
+  return await TourType.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+};
+
+const deleteTourType = async (id: string) => {
+  const isExisTourType = await TourType.findById(id);
+
+  if (!isExisTourType) {
+    throw new Error("Tour type is not founded!");
+  }
+
+  return await TourType.findByIdAndDelete(id);
+};
+
+// --- For Tour --- //
+const createTour = async (payload: ITour) => {
+  const isExisTour = await Tour.findOne({ name: payload.title });
+
+  if (isExisTour) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Tour is already exists");
+  }
+
+  return await Tour.create(payload);
+};
+
+const getAllTours = async () => {
+  const tours = await Tour.find();
+
+  return tours;
+};
+
+const getSingleTour = async (id: string) => {
+  const tour = await Tour.findById(id);
+
+  if (!tour) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
+  }
+
+  return tour;
+};
+
+const updateTour = async (id: string, payload: Partial<ITour>) => {
+  const tour = await Tour.findById(id);
+
+  if (!tour) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
+  }
+
+  return await Tour.findByIdAndUpdate(id, payload, { new: true });
+};
+
+const deleteTour = async (id: string) => {
+  const tour = await Tour.findById(id);
+
+  if (!tour) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
+  }
+
+  return await Tour.findByIdAndDelete(id);
+};
+
+export const TourService = {
+  createTourType,
+  getAllTourTypes,
+  updateTourType,
+  deleteTourType,
+  createTour,
+  getAllTours,
+  getSingleTour,
+  updateTour,
+  deleteTour,
+};
