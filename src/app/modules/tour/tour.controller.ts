@@ -51,7 +51,7 @@ const deleteTourType = catchAsync(async (req, res, next) => {
 });
 
 const createTour = catchAsync(async (req, res, next) => {
-  const result = await TourService.createTour();
+  const result = await TourService.createTour(req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -73,7 +73,8 @@ const getAllTours = catchAsync(async (req, res, next) => {
 });
 
 const getSingleTour = catchAsync(async (req, res, next) => {
-  const result = await TourService.getSingleTour();
+  const id = req.params.id as string;
+  const result = await TourService.getSingleTour(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -84,7 +85,8 @@ const getSingleTour = catchAsync(async (req, res, next) => {
 });
 
 const updateTour = catchAsync(async (req, res, next) => {
-  const result = await TourService.updateTour();
+  const id = req.params.id as string;
+  const result = await TourService.updateTour(id, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -95,7 +97,9 @@ const updateTour = catchAsync(async (req, res, next) => {
 });
 
 const deleteTour = catchAsync(async (req, res, next) => {
-  const result = await TourService.deleteTour();
+  const id = req.params.id as string;
+
+  const result = await TourService.deleteTour(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

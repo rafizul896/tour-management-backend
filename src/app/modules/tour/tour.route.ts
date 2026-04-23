@@ -27,6 +27,10 @@ router.delete(
 );
 
 // Tour
+router.post("/", TourController.createTour);
 router.get("/", TourController.getAllTours);
+router.get("/:id", TourController.getSingleTour);
+router.patch("/:id", TourController.updateTour);
+router.delete("/:id", TourController.deleteTour);
 
 export const TourRoutes = router;
