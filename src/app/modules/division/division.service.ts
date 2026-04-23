@@ -69,3 +69,4 @@ export const DivisionService = {
   updateDivision,
   deleteDivision,
 };
+
