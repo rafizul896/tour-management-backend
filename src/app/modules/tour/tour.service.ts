@@ -74,7 +74,10 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
   }
 
-  return await Tour.findByIdAndUpdate(id, payload, { new: true });
+  return await Tour.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
 };
 
 const deleteTour = async (id: string) => {
