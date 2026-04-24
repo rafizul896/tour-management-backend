@@ -13,7 +13,7 @@ const divisionSchema = new Schema<IDivision>(
 
 divisionSchema.pre("save", async function () {
   if (this.isModified("name")) {
-    const baseSlug = this.name.split(" ").join("-");
+    const baseSlug = this.name.toLowerCase().split(" ").join("-");
     let slug = `${baseSlug}-division`;
 
     let counter = 0;
@@ -29,7 +29,7 @@ divisionSchema.pre("findOneAndUpdate", async function () {
   const division = this.getUpdate() as Partial<IDivision>;
 
   if (division.name) {
-    const baseSlug = division.name.split(" ").join("-");
+    const baseSlug = division.name.toLowerCase().split(" ").join("-");
     let slug = `${baseSlug}-division`;
 
     let counter = 0;
