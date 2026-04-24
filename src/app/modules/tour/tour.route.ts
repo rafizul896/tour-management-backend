@@ -2,6 +2,8 @@ import { Router } from "express";
 import { TourController } from "./tour.controller";
 import checkAuth from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
+import validateRequest from "../../utils/validateRequest";
+import { createTourZodSchema, updateTourZodSchema } from "./tour.validation";
 
 const router = Router();
 
@@ -27,10 +29,27 @@ router.delete(
 );
 
 // Tour
-router.post("/", TourController.createTour);
+router.post(
+  "/",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validateRequest(createTourZodSchema),
+  TourController.createTour,
+);
+
 router.get("/", TourController.getAllTours);
 router.get("/:id", TourController.getSingleTour);
-router.patch("/:id", TourController.updateTour);
-router.delete("/:id", TourController.deleteTour);
+
+router.patch(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validateRequest(updateTourZodSchema),
+  TourController.updateTour,
+);
+
+router.delete(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  TourController.deleteTour,
+);
 
 export const TourRoutes = router;
