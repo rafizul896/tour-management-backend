@@ -28,7 +28,7 @@ const getAllDivision = catchAsync(async (req, res, next) => {
 });
 
 const getSingleDivision = catchAsync(async (req, res, next) => {
-  const slug = req.params.id as string;
+  const slug = req.params.slug as string;
   const data = await DivisionService.getSingleDivision(slug);
 
   sendResponse(res, {
