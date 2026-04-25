@@ -1,4 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IMeta } from "../../utils/sendResponse";
 import { excludeField, tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
@@ -53,7 +54,7 @@ const createTour = async (payload: ITour) => {
   return await Tour.create(payload);
 };
 
-const getAllTours = async (query: Record<string, unknown>) => {
+export const getAllToursOld = async (query: Record<string, unknown>) => {
   const filter = query;
   const searchTerm = query?.searchTerm || "";
   const sortBy = (query?.sortBy as string) || "createdAt";
@@ -87,6 +88,25 @@ const getAllTours = async (query: Record<string, unknown>) => {
     total: totalTours,
     totalPage: Math.ceil(totalTours / limit),
   };
+
+  return {
+    tours,
+    meta,
+  };
+};
+
+const getAllTours = async (query: Record<string, unknown>) => {
+  const queryBuilder = new QueryBuilder(Tour.find(), query);
+
+  const tours = await queryBuilder
+    .filter()
+    .search(tourSearchableFields)
+    .fields()
+    .sort()
+    .paginate()
+    .build();
+
+  const meta = await queryBuilder.getMeta();
 
   return {
     tours,
