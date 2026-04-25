@@ -1,4 +1,7 @@
 import AppError from "../../errorHelpers/AppError";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { IMeta } from "../../utils/sendResponse";
+import { excludeField, tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 import httpStatus from "http-status-codes";
@@ -51,10 +54,64 @@ const createTour = async (payload: ITour) => {
   return await Tour.create(payload);
 };
 
-const getAllTours = async () => {
-  const tours = await Tour.find();
+export const getAllToursOld = async (query: Record<string, unknown>) => {
+  const filter = query;
+  const searchTerm = query?.searchTerm || "";
+  const sortBy = (query?.sortBy as string) || "createdAt";
+  const fields = (query?.fields as string)?.split(",").join(" ");
+  const limit = Number(query.limit) || 10;
+  const page = Number(query.page) || 1;
+  const skip = (page - 1) * limit;
 
-  return tours;
+  for (const field of excludeField) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete filter[field];
+  }
+
+  const seachQuery = {
+    $or: tourSearchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    })),
+  };
+
+  const tours = await Tour.find(seachQuery)
+    .find(filter)
+    .sort(sortBy)
+    .select(fields)
+    .limit(limit)
+    .skip(skip);
+
+  const totalTours = await Tour.countDocuments();
+  const meta: IMeta = {
+    page,
+    limit,
+    total: totalTours,
+    totalPage: Math.ceil(totalTours / limit),
+  };
+
+  return {
+    tours,
+    meta,
+  };
+};
+
+const getAllTours = async (query: Record<string, unknown>) => {
+  const queryBuilder = new QueryBuilder(Tour.find(), query);
+
+  const tours = await queryBuilder
+    .filter()
+    .search(tourSearchableFields)
+    .fields()
+    .sort()
+    .paginate()
+    .build();
+
+  const meta = await queryBuilder.getMeta();
+
+  return {
+    tours,
+    meta,
+  };
 };
 
 const getSingleTour = async (id: string) => {
