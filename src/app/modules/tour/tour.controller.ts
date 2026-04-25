@@ -69,7 +69,8 @@ const getAllTours = catchAsync(async (req, res, next) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "Tours are retrieved successfully",
-    data: result,
+    meta: result?.meta,
+    data: result.tours,
   });
 });
 

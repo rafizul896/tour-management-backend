@@ -1,4 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
+import { IMeta } from "../../utils/sendResponse";
 import { excludeField, tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
@@ -79,7 +80,18 @@ const getAllTours = async (query: Record<string, unknown>) => {
     .limit(limit)
     .skip(skip);
 
-  return tours;
+  const totalTours = await Tour.countDocuments();
+  const meta: IMeta = {
+    page,
+    limit,
+    total: totalTours,
+    totalPage: Math.ceil(totalTours / limit),
+  };
+
+  return {
+    tours,
+    meta,
+  };
 };
 
 const getSingleTour = async (id: string) => {
