@@ -1,4 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
+import { excludeField, tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 import httpStatus from "http-status-codes";
@@ -51,8 +52,27 @@ const createTour = async (payload: ITour) => {
   return await Tour.create(payload);
 };
 
-const getAllTours = async () => {
-  const tours = await Tour.find();
+const getAllTours = async (query: Record<string, unknown>) => {
+  const filter = query;
+  const searchTerm = query.searchTerm || "";
+  const sortBy = (query.sortBy as string) || "createdAt";
+  const fields = (query.fields as string).split(",").join(" ");
+
+  for (const field of excludeField) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete filter[field];
+  }
+
+  const seachQuery = {
+    $or: tourSearchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    })),
+  };
+
+  const tours = await Tour.find(seachQuery)
+    .find(filter)
+    .sort(sortBy)
+    .select(fields);
 
   return tours;
 };
