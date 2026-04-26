@@ -126,7 +126,6 @@ const getSingleTour = async (id: string) => {
 
 const updateTour = async (id: string, payload: Partial<ITour>) => {
   const tour = await Tour.findById(id);
-
   if (!tour) {
     throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
   }
