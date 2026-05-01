@@ -5,6 +5,18 @@ import sendResponse from "../../utils/sendResponse";
 import { PaymentService } from "./payment.service";
 import httpStatus from "http-status-codes";
 
+const initPayment = catchAsync(async (req, res, next) => {
+  const bookingId = req.params.bookingId as string;
+  const result = await PaymentService.initPayment(bookingId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.CREATED,
+    message: "Payment Done successfully",
+    data: result,
+  });
+});
+
 const successPayment = catchAsync(async (req, res, next) => {
   const query = req.query;
   const result = await PaymentService.successPayment(query.tran_id as string);
@@ -42,4 +54,5 @@ export const PaymentController = {
   successPayment,
   failPayment,
   cancelPayment,
+  initPayment,
 };
