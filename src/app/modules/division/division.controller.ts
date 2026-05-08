@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { IDivision } from "./division.interface";
 import { DivisionService } from "./division.service";
 import httpStatus from "http-status-codes";
 
 const createDivision = catchAsync(async (req, res, next) => {
-  const data = req.body;
-  const division = await DivisionService.createDivision(data);
+  const payload: IDivision = {
+    ...req.body,
+    thumbnail: req.file?.path,
+  };
+  const division = await DivisionService.createDivision(payload);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
