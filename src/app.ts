@@ -20,11 +20,11 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // for from data
 app.use(cors());
 app.use(cookirParser());
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use("/api/v1", router);
 
