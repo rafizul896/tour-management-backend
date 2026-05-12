@@ -18,14 +18,18 @@ router.post(
   validateRequest(createDivisionValidationSchema),
   DivisionControllers.createDivision,
 );
+
 router.get("/", DivisionControllers.getAllDivision);
 router.get("/:slug", DivisionControllers.getSingleDivision);
+
 router.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  multerUpload.single("file"),
   validateRequest(updateDivisionValidationSchema),
   DivisionControllers.updateDivision,
 );
+
 router.delete(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
