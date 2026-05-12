@@ -39,22 +39,21 @@ export const sendEmail = async ({
 
     const info = await transporter.sendMail({
       from: envVars.SMTP.SMTP_FROM,
-      to,
-      subject,
-      text: "",
+      to: to,
+      subject: subject,
       html: html,
-      attachments: attachments?.map((attac) => ({
-        fileName: attac.filename,
-        content: attac.content,
-        contentType: attac.contentType,
+      attachments: attachments?.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.contentType,
       })),
     });
 
-    console.log(`Email sent to ${to}: ${info.messageId}`);
+    console.log(`\u2709\uFE0F Email sent to ${to}: ${info.messageId}`);
   } catch (err) {
     if (err instanceof Error) {
-      console.log("Email seanding error", err.message);
-      throw new AppError(401, "Email Error");
+      console.log("Email seanding error", err);
+      throw new AppError(401, `Email Error || ${err.message}`);
     }
   }
 };

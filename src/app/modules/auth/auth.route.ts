@@ -15,11 +15,6 @@ router.patch(
   checkAuth(...Object.values(Role)),
   AuthControllers.changePassword,
 );
-router.post(
-  "/reset-password",
-  checkAuth(...Object.values(Role)),
-  AuthControllers.resetPassword,
-);
 
 router.post(
   "/set-password",
@@ -29,8 +24,13 @@ router.post(
 
 router.post(
   "/forgot-password",
-  checkAuth(...Object.values(Role)),
   AuthControllers.forgotPassword,
+);
+
+router.post(
+  "/reset-password",
+  checkAuth(...Object.values(Role)),
+  AuthControllers.resetPassword,
 );
 
 router.get(

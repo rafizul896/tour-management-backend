@@ -78,19 +78,6 @@ const changePassword = catchAsync(async (req, res, next) => {
   });
 });
 
-const resetPassword = catchAsync(async (req, res, next) => {
-  const decodedToken = req.user as JwtPayload;
-  const data = req.body;
-  const change = await AuthServices.resetPassword();
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Password changed successfully",
-    data: change,
-  });
-});
-
 const setPassword = catchAsync(async (req, res, next) => {
   const password = req.body.password;
   const decodedToken = req.user as JwtPayload;
@@ -106,12 +93,27 @@ const setPassword = catchAsync(async (req, res, next) => {
 });
 
 const forgotPassword = catchAsync(async (req, res, next) => {
-  const change = await AuthServices.forgotPassword();
+  const email = req.body.email
+ await AuthServices.forgotPassword(email);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Password changed successfully",
+    message: "Email sent successfully",
+    data: null,
+  });
+});
+
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const decodedToken = req.user as JwtPayload;
+  const payload = req.body;
+  const change = await AuthServices.resetPassword(decodedToken.userId,payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset successfully",
     data: change,
   });
 });

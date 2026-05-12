@@ -8,6 +8,8 @@ import { generateToken, verifyToken } from "../../utils/jwt";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
 import { Response } from "express";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../../utils/sendEmail";
 
 const credentialsLogin = async (payload: Partial<IUser>) => {
   const { email } = payload;
@@ -174,10 +176,6 @@ const googleCallback = async (
   return;
 };
 
-const resetPassword = async () => {
-  //
-};
-
 const setPassword = async (userId: string, plainPassword: string) => {
   const isUserExist = await User.findById(userId);
 
@@ -211,8 +209,73 @@ const setPassword = async (userId: string, plainPassword: string) => {
   await isUserExist.save();
 };
 
-const forgotPassword = async () => {
-  //
+const forgotPassword = async (email: string) => {
+  const isUserExist = await User.findOne({ email });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+
+  if (
+    isUserExist.isActive === IsActive.BLOCKED ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
+    throw new AppError(
+      httpStatus.BAD_GATEWAY,
+      `User is ${isUserExist.isActive}`,
+    );
+  }
+
+  if (isUserExist.isDeleted) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+  }
+
+  const jwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
+
+  const resetToken = jwt.sign(jwtPayload, envVars.JWT_ACCESS_SECRET, {
+    expiresIn: "10m",
+  });
+
+  const resetUrl = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
+
+  await sendEmail({
+    to: isUserExist.email,
+    subject: "Password Reset",
+    templateName: "forgetPassword",
+    templateData: {
+      name: isUserExist.name,
+      resetUrl,
+    },
+  });
+
+  return;
+};
+
+const resetPassword = async (
+  decodedUserId: string,
+  payload: { id: string; newPassword: string },
+) => {
+  if (payload.id !== decodedUserId) {
+    throw new AppError(401, "You can't reset your password");
+  }
+
+  const isUserExist = await User.findById(decodedUserId);
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User is not found!");
+  }
+
+  const hashPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(envVars.BCRYPT_SALT_ROUND),
+  );
+
+  isUserExist.password = hashPassword;
+  isUserExist.save();
 };
 
 export const AuthServices = {
