@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IMeta } from "../../utils/sendResponse";
@@ -125,15 +126,55 @@ const getSingleTour = async (id: string) => {
 };
 
 const updateTour = async (id: string, payload: Partial<ITour>) => {
-  const tour = await Tour.findById(id);
-  if (!tour) {
+  const isExisTour = await Tour.findById(id);
+
+  if (!isExisTour) {
     throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
   }
 
-  return await Tour.findByIdAndUpdate(id, payload, {
+  if (
+    payload.images &&
+    payload.images.length &&
+    isExisTour.images &&
+    isExisTour.images.length
+  ) {
+    payload.images = [...payload.images, ...isExisTour.images];
+  }
+
+  if (
+    payload.deleteImages &&
+    payload.deleteImages.length &&
+    isExisTour.images &&
+    isExisTour.images.length
+  ) {
+    const restDBImages = isExisTour.images.filter(
+      (image) => !payload.deleteImages?.includes(image),
+    );
+
+    const updatedPayloadImages = (payload.images || [])
+      .filter((image) => !payload.deleteImages?.includes(image))
+      .filter((image) => !restDBImages.includes(image));
+
+    payload.images = [...restDBImages, ...updatedPayloadImages];
+  }
+
+  const updatedTour = await Tour.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
   });
+
+  if (
+    payload.deleteImages &&
+    payload.deleteImages.length &&
+    isExisTour.images &&
+    isExisTour.images.length
+  ) {
+    await Promise.all(
+      payload.deleteImages.map((url) => deleteImageFromCloudinary(url)),
+    );
+  }
+
+  return updatedTour;
 };
 
 const deleteTour = async (id: string) => {
