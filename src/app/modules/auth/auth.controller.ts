@@ -105,6 +105,17 @@ const setPassword = catchAsync(async (req, res, next) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req, res, next) => {
+  const change = await AuthServices.forgotPassword();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password changed successfully",
+    data: change,
+  });
+});
+
 const googleCallback = catchAsync(async (req, res, next) => {
   let redirectTo = req.query.state ? (req.query.state as string) : "";
 
@@ -125,5 +136,6 @@ export const AuthControllers = {
   changePassword,
   resetPassword,
   setPassword,
+  forgotPassword,
   googleCallback,
 };

@@ -18,6 +18,24 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "User doesn't exist");
   }
 
+  if (
+    isUserExist.isActive === IsActive.BLOCKED ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
+    throw new AppError(
+      httpStatus.BAD_GATEWAY,
+      `User is ${isUserExist.isActive}`,
+    );
+  }
+
+  if (isUserExist.isDeleted) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+  }
+
+  if (!isUserExist.isVerified) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
+  }
+
   const isPasswordMatch = bcrypt.compareSync(
     payload.password as string,
     isUserExist.password as string,
@@ -193,6 +211,10 @@ const setPassword = async (userId: string, plainPassword: string) => {
   await isUserExist.save();
 };
 
+const forgotPassword = async () => {
+  //
+};
+
 export const AuthServices = {
   credentialsLogin,
   getNewAccessToken,
@@ -200,4 +222,5 @@ export const AuthServices = {
   googleCallback,
   resetPassword,
   setPassword,
+  forgotPassword,
 };
