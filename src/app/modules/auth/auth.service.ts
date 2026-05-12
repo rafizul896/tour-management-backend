@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import AppError from "../../errorHelpers/AppError";
-import { IsActive, IUser } from "../user/user.interface";
+import { IAuthProvider, IsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcryptjs";
@@ -156,9 +156,48 @@ const googleCallback = async (
   return;
 };
 
+const resetPassword = async () => {
+  //
+};
+
+const setPassword = async (userId: string, plainPassword: string) => {
+  const isUserExist = await User.findById(userId);
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+
+  if (
+    isUserExist.password &&
+    isUserExist.auths.some((providerObj) => providerObj.provider === "google")
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You have already set your password. For changing password you can use change password route.",
+    );
+  }
+
+  const hashPassword = await bcrypt.hash(
+    plainPassword,
+    Number(envVars.BCRYPT_SALT_ROUND),
+  );
+
+  const auths: IAuthProvider[] = [
+    ...isUserExist.auths,
+    { provider: "credentials", providerId: isUserExist.email },
+  ];
+
+  isUserExist.password = hashPassword;
+  isUserExist.auths = auths;
+
+  await isUserExist.save();
+};
+
 export const AuthServices = {
   credentialsLogin,
   getNewAccessToken,
   changePassword,
   googleCallback,
+  resetPassword,
+  setPassword,
 };
