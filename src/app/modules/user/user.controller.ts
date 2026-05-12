@@ -3,6 +3,7 @@ import httpStatus from "http-status-codes";
 import { UserServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { JwtPayload } from "jsonwebtoken";
 
 const createUser = catchAsync(async (req, res, next) => {
   const userData = req.body;
@@ -19,7 +20,7 @@ const createUser = catchAsync(async (req, res, next) => {
 const updateUser = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
   const userData = req.body;
- const verifiedToken =  req.user;
+  const verifiedToken = req.user as JwtPayload;
 
   const newUpdatedUser = await UserServices.updateUser(
     userId as string,
@@ -46,8 +47,21 @@ const getAllUsers = catchAsync(async (req, res, next) => {
   });
 });
 
+const getMe = catchAsync(async (req, res, next) => {
+  const decodedToken = req.user as JwtPayload;
+  const user = await UserServices.getMe(decodedToken.userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User profile retrived successfully",
+    data: user,
+  });
+});
+
 export const UserControllers = {
   createUser,
   getAllUsers,
-  updateUser
+  updateUser,
+  getMe,
 };

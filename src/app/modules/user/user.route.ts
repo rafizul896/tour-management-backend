@@ -11,12 +11,16 @@ router.post(
   validateRequest(userSchema),
   UserControllers.createUser,
 );
+
 router.get("/", checkAuth(...Object.values(Role)), UserControllers.getAllUsers);
+
 router.patch(
   "/:id",
   validateRequest(updateUserSchema),
   checkAuth(...Object.values(Role)),
   UserControllers.updateUser,
 );
+
+router.get("/me", checkAuth(...Object.values(Role)), UserControllers.getMe);
 
 export const UserRoutes = router;

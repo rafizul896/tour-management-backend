@@ -78,6 +78,46 @@ const changePassword = catchAsync(async (req, res, next) => {
   });
 });
 
+const setPassword = catchAsync(async (req, res, next) => {
+  const password = req.body.password;
+  const decodedToken = req.user as JwtPayload;
+
+  const change = await AuthServices.setPassword(decodedToken.userId, password);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password changed successfully",
+    data: change,
+  });
+});
+
+const forgotPassword = catchAsync(async (req, res, next) => {
+  const email = req.body.email
+ await AuthServices.forgotPassword(email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Email sent successfully",
+    data: null,
+  });
+});
+
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const decodedToken = req.user as JwtPayload;
+  const payload = req.body;
+  const change = await AuthServices.resetPassword(decodedToken.userId,payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset successfully",
+    data: change,
+  });
+});
+
 const googleCallback = catchAsync(async (req, res, next) => {
   let redirectTo = req.query.state ? (req.query.state as string) : "";
 
@@ -86,7 +126,7 @@ const googleCallback = catchAsync(async (req, res, next) => {
   }
 
   const user = req.user;
-  
+
   await AuthServices.googleCallback(user, res);
   res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
 });
@@ -96,5 +136,8 @@ export const AuthControllers = {
   getNewAccessToken,
   logout,
   changePassword,
+  resetPassword,
+  setPassword,
+  forgotPassword,
   googleCallback,
 };
