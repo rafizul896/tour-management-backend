@@ -1,7 +1,7 @@
 import PDFDocument from "pdfkit";
 import AppError from "../errorHelpers/AppError";
 
-interface IInvoiceData {
+export interface IInvoiceData {
   transactionId: string;
   bookingDate: Date;
   userName: string;
@@ -10,9 +10,9 @@ interface IInvoiceData {
   totalAmount: number;
 }
 
-const genaratePdf = async (invoiceData: IInvoiceData) => {
+const generatePdf = async (invoiceData: IInvoiceData): Promise<Buffer> => {
   try {
-    return new Promise((resolve, reject) => {
+    return new Promise<Buffer>((resolve, reject) => {
       const doc = new PDFDocument({
         margin: 50,
       });
@@ -48,47 +48,48 @@ const genaratePdf = async (invoiceData: IInvoiceData) => {
       // =====================================================
       // COMPANY INFO
       // =====================================================
-
+      // COMPANY INFO
       doc.fillColor("#111827").fontSize(18).text("Travel Agency");
 
       doc
-        .fontSize(11)
+        .fontSize(12)
         .fillColor("gray")
         .text("Dhaka, Bangladesh")
         .text("support@travelagency.com")
         .text("+880123456789");
 
-      doc.moveDown(2);
+      // Dynamic Top Position
+      const invoiceBoxTop = doc.y + 25;
 
-      // =====================================================
-      // INVOICE INFORMATION BOX
-      // =====================================================
-
+      // INVOICE BOX
       doc
-        .roundedRect(50, 190, 500, 130, 10)
+        .roundedRect(50, invoiceBoxTop, 500, 130, 10)
         .fillAndStroke("#F8FAFC", "#D1D5DB");
 
       doc.fillColor("#111827");
 
-      doc.fontSize(14).text("Invoice Details", 70, 210);
-
-      doc.moveDown();
+      doc.fontSize(14).text("Invoice Details", 70, invoiceBoxTop + 20);
 
       const formattedDate = new Date(invoiceData.bookingDate).toDateString();
 
-      // LEFT SIDE
-      doc.fontSize(12).fillColor("black").text(`Transaction ID:`, 70, 245);
+      doc
+        .fontSize(12)
+        .fillColor("black")
+        .text("Transaction ID:", 70, invoiceBoxTop + 55);
 
-      doc.fillColor("gray").text(invoiceData.transactionId, 200, 245);
+      doc
+        .fillColor("gray")
+        .text(invoiceData.transactionId, 200, invoiceBoxTop + 55);
 
-      doc.fillColor("black").text(`Booking Date:`, 70, 270);
+      doc.fillColor("black").text("Booking Date:", 70, invoiceBoxTop + 80);
 
-      doc.fillColor("gray").text(formattedDate, 200, 270);
+      doc.fillColor("gray").text(formattedDate, 200, invoiceBoxTop + 80);
 
-      doc.fillColor("black").text(`Customer Name:`, 70, 295);
+      doc.fillColor("black").text("Customer Name:", 70, invoiceBoxTop + 105);
 
-      doc.fillColor("gray").text(invoiceData.userName, 200, 295);
-
+      doc
+        .fillColor("gray")
+        .text(invoiceData.userName, 200, invoiceBoxTop + 105);
       // =====================================================
       // TOUR DETAILS TABLE
       // =====================================================
@@ -159,4 +160,4 @@ const genaratePdf = async (invoiceData: IInvoiceData) => {
   }
 };
 
-export default genaratePdf;
+export default generatePdf;
