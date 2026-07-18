@@ -11,7 +11,6 @@ import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLCommerzService } from "../sslCommerz/sslCommerz.service";
 import { getTransactionId } from "../../utils/getTransactionId";
 
-
 const createBooking = async (userId: string, payload: Partial<IBooking>) => {
   const transactionId = getTransactionId();
   const session = await Booking.startSession();
@@ -82,8 +81,8 @@ const createBooking = async (userId: string, payload: Partial<IBooking>) => {
     await session.commitTransaction();
     session.endSession();
     return {
-      booking: updatedBooking,
       paymentUrl: sslPayment.GatewayPageURL,
+      booking: updatedBooking,
     };
   } catch (err) {
     await session.abortTransaction();

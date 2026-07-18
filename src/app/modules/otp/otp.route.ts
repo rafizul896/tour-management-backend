@@ -7,3 +7,4 @@ router.post("/send", OTPControllers.sendOTP);
 router.post("/verify", OTPControllers.verifyOTP);
 
 export const OTPRoutes = router;
+

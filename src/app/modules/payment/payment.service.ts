@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { uploadBufferToCloudinery } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import generatePdf, { IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
@@ -10,6 +11,7 @@ import { ITour } from "../tour/tour.interface";
 import { IUser } from "../user/user.interface";
 import { PAYMENT_STATUS } from "./payment.interface";
 import { Payment } from "./payment.model";
+import httpStatus from "http-status-codes";
 
 const initPayment = async (bookingId: string) => {
   const booking = await Booking.findById(bookingId);
@@ -39,6 +41,20 @@ const initPayment = async (bookingId: string) => {
   return {
     paymentUrl: sslPayment.GatewayPageURL,
   };
+};
+
+const getInvliceURL = async (paymentId: string) => {
+  const res = await Payment.findById(paymentId).select("invoiceUrl");
+
+  if (!res) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+
+  if (!res.invoiceUrl) {
+    throw new AppError(httpStatus.NOT_FOUND, "Invoice not found");
+  }
+
+  return res;
 };
 
 const successPayment = async (tran_id: string) => {
@@ -73,7 +89,29 @@ const successPayment = async (tran_id: string) => {
       userName: (booking?.user as IUser).name,
     };
 
-    const pdfBuffer = await generatePdf(invoiceData);
+    const pdfBuffer = (await generatePdf(
+      invoiceData,
+    )) as Buffer<ArrayBufferLike>;
+
+    const cloudinaryResult = await uploadBufferToCloudinery(
+      pdfBuffer,
+      "invoice",
+    );
+
+    if (!cloudinaryResult) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Error uploading pdf to cloudinary",
+      );
+    }
+
+    await Payment.findByIdAndUpdate(
+      updatedPayment?._id,
+      {
+        invoiceUrl: cloudinaryResult.secure_url,
+      },
+      { runValidators: true, session },
+    );
 
     await sendEmail({
       to: (booking?.user as IUser).email,
@@ -83,7 +121,7 @@ const successPayment = async (tran_id: string) => {
         tran_id,
         amount: updatedPayment?.amount,
       },
-      
+
       attachments: [
         {
           filename: "invoice.pdf",
@@ -182,4 +220,5 @@ export const PaymentService = {
   failPayment,
   cancelPayment,
   initPayment,
+  getInvliceURL,
 };

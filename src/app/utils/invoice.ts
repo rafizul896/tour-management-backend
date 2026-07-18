@@ -10,7 +10,7 @@ export interface IInvoiceData {
   totalAmount: number;
 }
 
-const generatePdf = async (invoiceData: IInvoiceData): Promise<Buffer> => {
+const generatePdf = async (invoiceData: IInvoiceData)=> {
   try {
     return new Promise<Buffer>((resolve, reject) => {
       const doc = new PDFDocument({
