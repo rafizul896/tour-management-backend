@@ -9,6 +9,6 @@ router.post("/init-payment/:bookingId", PaymentController.initPayment);
 router.post("/success", PaymentController.successPayment);
 router.post("/fail", PaymentController.failPayment);
 router.post("/cancel", PaymentController.cancelPayment);
-router.get("/invoice/:paymentId",checkAuth(...Object(Role)), PaymentController.getInvliceURL);
+router.get("/invoice/:paymentId",checkAuth(...Object.values(Role)), PaymentController.getInvliceURL);
 
 export const PaymentRoutes = router;
