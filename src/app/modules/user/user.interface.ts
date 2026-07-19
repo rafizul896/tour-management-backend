@@ -34,4 +34,6 @@ export interface IUser {
   role: Role;
   bookings?: Types.ObjectId[];
   guides?: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
 }

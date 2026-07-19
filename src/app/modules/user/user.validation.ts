@@ -34,14 +34,6 @@ export const updateUserSchema = z.object({
     .max(50, "Name must be less than 50 characters")
     .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces")
     .optional(),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .regex(
-      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/,
-      "Password must contain at least one letter and one number",
-    )
-    .optional(),
   phone: z
     .string()
     .regex(/^(?:\+8801|8801|01)[3-9]\d{8}$/, "Invalid Bangladeshi phone number")

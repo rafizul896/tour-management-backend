@@ -17,6 +17,18 @@ const initPayment = catchAsync(async (req, res, next) => {
   });
 });
 
+const getInvliceURL = catchAsync(async (req, res, next) => {
+  const paymentId = req.params.paymentId as string;
+  const result = await PaymentService.getInvliceURL(paymentId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Payment invliceUrl retrived successfully",
+    data: result,
+  });
+});
+
 const successPayment = catchAsync(async (req, res, next) => {
   const query = req.query;
   const result = await PaymentService.successPayment(query.tran_id as string);
@@ -55,4 +67,5 @@ export const PaymentController = {
   failPayment,
   cancelPayment,
   initPayment,
+  getInvliceURL,
 };
