@@ -6,6 +6,8 @@
   "scripts": {
     "lint": "npx eslint ./src",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
+    "start": "node ./dist/server.ts",
+    "build": "npm install --force && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -29,13 +31,13 @@
     "eslint": "^9.39.3",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.1"
+    "typescript-eslint": "^8.56.1",
+    "@types/jsonwebtoken": "^9.0.10"
   },
   "dependencies": {
-    "@types/jsonwebtoken": "^9.0.10",
     "axios": "^1.15.2",
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.10.0",
+    "cloudinary": "^1.21.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
