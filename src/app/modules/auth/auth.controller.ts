@@ -11,12 +11,16 @@ const credentialsLogin = catchAsync(async (req, res, next) => {
 
   res.cookie("accessToken", logInfo.accessToken, {
     httpOnly: true,
-    secure: false,
+    secure: envVars.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
   res.cookie("refreshToken", logInfo.refreshToken, {
     httpOnly: true,
-    secure: false,
+    secure: envVars.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
   sendResponse(res, {
@@ -33,7 +37,9 @@ const getNewAccessToken = catchAsync(async (req, res, next) => {
 
   res.cookie("accessToken", tokenInfo.accessToken, {
     httpOnly: true,
-    secure: false,
+    secure: envVars.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
   sendResponse(res, {
@@ -47,14 +53,14 @@ const getNewAccessToken = catchAsync(async (req, res, next) => {
 const logout = catchAsync(async (req, res, next) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: envVars.NODE_ENV === "production",
+    sameSite: "none",
   });
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: envVars.NODE_ENV === "production",
+    sameSite: "none",
   });
 
   sendResponse(res, {

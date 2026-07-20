@@ -1,3 +1,5 @@
 node_modules
 .env
-.env_example
+.env.dev
+dist
+.vercel
