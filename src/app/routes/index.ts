@@ -7,6 +7,7 @@ import { BookingRoutes } from "../modules/booking/booking.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { OTPRoutes } from "../modules/otp/otp.route";
 import { statsRoutes } from "../modules/stats/stats.route";
+import { guideRoutes } from "../modules/guide/guide.route";
 
 interface IModuleRoutes {
   path: string;
@@ -48,6 +49,10 @@ const moduleRoutes: IModuleRoutes[] = [
     path: "/stats",
     route: statsRoutes,
   },
+  {
+    path: "/guide",
+    route: guideRoutes
+  }
 ];
 
 moduleRoutes.forEach((route) => {
