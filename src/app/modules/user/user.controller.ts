@@ -59,9 +59,22 @@ const getMe = catchAsync(async (req, res, next) => {
   });
 });
 
+const getSingleUser = catchAsync(async (req, res, next) => {
+  const id = req.params.id as string;
+  const user = await UserServices.getSingleUser(id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.CREATED,
+    message: "User Retrieved Successfully",
+    data: user
+  });
+});
+
 export const UserControllers = {
   createUser,
   getAllUsers,
   updateUser,
   getMe,
+  getSingleUser,
 };

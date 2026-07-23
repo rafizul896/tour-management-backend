@@ -12,7 +12,11 @@ router.post(
   UserControllers.createUser,
 );
 
-router.get("/", checkAuth(...Object.values(Role)), UserControllers.getAllUsers);
+router.get(
+  "/all-users",
+  checkAuth(...Object.values(Role)),
+  UserControllers.getAllUsers,
+);
 
 router.patch(
   "/:id",
@@ -23,4 +27,11 @@ router.patch(
 
 router.get("/me", checkAuth(...Object.values(Role)), UserControllers.getMe);
 
+router.get(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  UserControllers.getSingleUser,
+);
+
 export const UserRoutes = router;
+
