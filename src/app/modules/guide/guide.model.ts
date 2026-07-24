@@ -21,11 +21,7 @@ const guideSchema = new Schema<IGuide>(
       type: String,
       enum: Object.values(GUIDE_STATUS),
       default: GUIDE_STATUS.PENDING,
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
+    }
   },
   {
     timestamps: true,

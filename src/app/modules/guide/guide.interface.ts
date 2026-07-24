@@ -6,7 +6,7 @@ export enum GUIDE_STATUS {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
-  DELETED = "DELETED"
+  DELETED = "DELETED",
 }
 
 export interface IGuide {
@@ -14,5 +14,4 @@ export interface IGuide {
   nidPhoto: string;
   division: Types.ObjectId | IDivision;
   status: GUIDE_STATUS;
-  isDeleted: boolean;
 }

@@ -16,7 +16,7 @@ router.post(
   GuideControllers.applyForGuide,
 );
 
-router.post(
+router.patch(
   "/approve/:id",
   checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
   GuideControllers.updateApplicationStatus,
@@ -34,6 +34,10 @@ router.get(
   GuideControllers.getSingleGuideApplication,
 );
 
-router.delete("/:id", GuideControllers.softDeleteGuide);
+router.delete(
+  "/:id",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
+  GuideControllers.softDeleteGuide,
+);
 
 export const guideRoutes = router;
