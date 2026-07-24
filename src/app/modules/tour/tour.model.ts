@@ -29,6 +29,10 @@ const tourSchema = new Schema<ITour>(
     tourPlan: { type: [String], default: [] },
     division: { type: Schema.Types.ObjectId, ref: Division, required: true },
     tourType: { type: Schema.Types.ObjectId, ref: TourType, required: true },
+    guides: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
   },
   { timestamps: true },
 );

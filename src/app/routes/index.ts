@@ -51,8 +51,8 @@ const moduleRoutes: IModuleRoutes[] = [
   },
   {
     path: "/guide",
-    route: guideRoutes
-  }
+    route: guideRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => {
