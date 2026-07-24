@@ -20,6 +20,7 @@ export interface ITour {
   division: Types.ObjectId;
   tourType: Types.ObjectId;
   deleteImages?: string[];
+  guides: Types.ObjectId[]
 }
 
 export interface ITourType {
