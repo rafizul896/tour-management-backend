@@ -19,6 +19,14 @@ const createBooking = async (userId: string, payload: Partial<IBooking>) => {
   try {
     const isUserExist = await User.findById(userId);
 
+    if (!isUserExist) {
+      throw new AppError(httpStatus.BAD_REQUEST, "User doesn't exist");
+    }
+
+    if (!isUserExist.isVerified) {
+      throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
+    }
+
     if (!isUserExist?.phone || !isUserExist.address) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
