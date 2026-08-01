@@ -13,14 +13,12 @@ const credentialsLogin = catchAsync(async (req, res, next) => {
     httpOnly: true,
     secure: envVars.NODE_ENV === "production",
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
   res.cookie("refreshToken", logInfo.refreshToken, {
     httpOnly: true,
     secure: envVars.NODE_ENV === "production",
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
   sendResponse(res, {
@@ -39,7 +37,6 @@ const getNewAccessToken = catchAsync(async (req, res, next) => {
     httpOnly: true,
     secure: envVars.NODE_ENV === "production",
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
   sendResponse(res, {

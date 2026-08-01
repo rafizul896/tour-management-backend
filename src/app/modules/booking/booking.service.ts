@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from "../../errorHelpers/AppError";
 import { User } from "../user/user.model";
-import { IBooking } from "./booking.interface";
+import { BOOKING_STATUS, IBooking } from "./booking.interface";
 import httpStatus from "http-status-codes";
 import { Booking } from "./booking.model";
 import { Payment } from "../payment/payment.model";
@@ -10,6 +10,7 @@ import { Tour } from "../tour/tour.model";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLCommerzService } from "../sslCommerz/sslCommerz.service";
 import { getTransactionId } from "../../utils/getTransactionId";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 const createBooking = async (userId: string, payload: Partial<IBooking>) => {
   const transactionId = getTransactionId();
@@ -99,22 +100,89 @@ const createBooking = async (userId: string, payload: Partial<IBooking>) => {
   }
 };
 
-const getAllBookings = async () => {
-  const bookings = await Booking.find({});
+const getAllBookings = async (query: Record<string, unknown>) => {
+  const queryBuilder = new QueryBuilder(
+    Booking.find()
+      .populate("user", "name email phone address")
+      .populate("tour", "title costFrom")
+      .populate("payment"),
+    query,
+  );
+
+  const bookings = await queryBuilder
+    .filter()
+    .fields()
+    .sort()
+    .paginate()
+    .build();
+
+  const meta = await queryBuilder.getMeta();
+
+  return {
+    bookings,
+    meta,
+  };
+};
+
+const getSingleBooking = async (id: string) => {
+  const booking = await Booking.findById(id)
+    .populate("user", "name email phone address")
+    .populate("tour", "title costFrom")
+    .populate("payment");
+
+  return booking;
+};
+
+const getUserBookings = async (userId: string) => {
+  const bookings = await Booking.find({ user: userId })
+    .populate("user", "name email phone address")
+    .populate("tour", "title costFrom")
+    .populate("payment");
 
   return bookings;
 };
 
-const getSingleBooking = async () => {
-  //
-};
+const updateBookingStatus = async (id: string, status: BOOKING_STATUS) => {
+  const booking = await Booking.findById(id);
 
-const getUserBookings = async () => {
-  //
-};
+  if (!booking) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
+  }
 
-const updateBookingStatus = async () => {
-  //
+  if (!Object.values(BOOKING_STATUS).includes(status)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid booking status");
+  }
+
+  if (booking.status === status) {
+    throw new AppError(httpStatus.BAD_REQUEST, `Booking is already ${status}`);
+  }
+
+  if (
+    [
+      BOOKING_STATUS.COMPLETE,
+      BOOKING_STATUS.CANCEL,
+      BOOKING_STATUS.FAILED,
+    ].includes(booking.status)
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Cannot change status of a ${booking.status} booking`,
+    );
+  }
+
+  const updatedBooking = await Booking.findByIdAndUpdate(
+    id,
+    { status },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
+    .populate("user", "name email phone address")
+    .populate("tour", "title costFrom")
+    .populate("payment");
+
+  return updatedBooking;
 };
 
 export const BookingService = {

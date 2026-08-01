@@ -12,8 +12,8 @@ const genarateOTP = (length = 6) => {
   return otp;
 };
 
-const sendOTP = async (email: string) => {
-  const user = await User.findOne({ email });
+const sendOTP = async (payload: { name: string; email: string }) => {
+  const user = await User.findOne({ email: payload.email });
 
   if (!user) {
     throw new AppError(401, "User not Found");
@@ -24,18 +24,18 @@ const sendOTP = async (email: string) => {
   }
 
   const otp = genarateOTP();
-  const redisKey = `otp:${email}`;
+  const redisKey = `otp:${payload.email}`;
 
   await redisClient.set(redisKey, otp, {
     expiration: { type: "EX", value: OTP_EXPIRATION },
   });
 
   await sendEmail({
-    to: email,
+    to: payload.email,
     subject: "Your OTP Code",
     templateName: "otp",
     templateData: {
-      name: user.name,
+      name: payload.name,
       otp,
     },
   });

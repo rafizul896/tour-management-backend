@@ -34,6 +34,10 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
   }
 
+  if (!isUserExist.isVerified) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
+  }
+
   const isPasswordMatch = bcrypt.compareSync(
     payload.password as string,
     isUserExist.password as string,
@@ -163,14 +167,12 @@ const googleCallback = async (
     httpOnly: true,
     secure: envVars.NODE_ENV === "production",
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: envVars.NODE_ENV === "production",
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
   return;

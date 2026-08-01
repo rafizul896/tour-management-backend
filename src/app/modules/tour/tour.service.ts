@@ -142,6 +142,15 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
   }
 
   if (
+    payload.images &&
+    payload.images.length === 0 &&
+    isExisTour?.images &&
+    isExisTour.images.length
+  ) {
+    payload.images = isExisTour?.images;
+  }
+
+  if (
     payload.deleteImages &&
     payload.deleteImages.length &&
     isExisTour.images &&
