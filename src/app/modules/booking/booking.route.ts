@@ -29,7 +29,7 @@ router.get(
   BookingController.getUserBookings,
 );
 
-router.post(
+router.get(
   "/:bookingId",
   checkAuth(...Object.values(Role)),
   BookingController.getSingleBooking,

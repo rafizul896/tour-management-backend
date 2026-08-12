@@ -4,57 +4,92 @@ import app from "./app";
 import mongoose from "mongoose";
 import { envVars } from "./app/config/env";
 import seedSuperAdmin from "./app/utils/seedSuperAdmin";
-import { conncectRedis } from "./app/config/redis.config";
+import { connectRedis, redisClient } from "./app/config/redis.config";
 
 let server: Server;
 
-const main = async () => {
+const startServer = async () => {
   try {
+    // Connect MongoDB
     await mongoose.connect(envVars.DB_URL as string);
+    console.log("MongoDB connected successfully");
 
+    // Connect Redis
+    await connectRedis();
+    console.log("Redis connected successfully");
+
+    // Seed Super Admin
+    await seedSuperAdmin();
+
+    // Start Express server
     server = app.listen(envVars.PORT, () => {
-      console.log(`Server is listening port on ${envVars.PORT}`);
+      console.log(`Server is running on port ${envVars.PORT}`);
     });
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
   }
 };
 
-(async () => {
-  await conncectRedis();
-  await main();
-  await seedSuperAdmin();
-})();
+// Graceful shutdown
+const gracefulShutdown = async (signal: string) => {
+  console.log(`${signal} received. Shutting down gracefully...`);
 
-// unhandled, uncaught, signal termination error
-process.on("unhandledRejection", (err) => {
-  console.log("Form unhandleRejection", err);
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
+  try {
+    // Close HTTP server
+    if (server) {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      console.log("HTTP server closed");
+    }
+
+    // Close MongoDB connection
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed");
+
+    // Close Redis connection
+    if (redisClient.isOpen) {
+      await redisClient.quit();
+      console.log("Redis connection closed");
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during graceful shutdown:", error);
+    process.exit(1);
   }
+};
 
-  process.exit(1);
+// Handle unhandled promise rejection
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled Rejection:", error);
+
+  gracefulShutdown("UNHANDLED_REJECTION");
 });
 
-process.on("uncaughtException", (err) => {
-  console.log("Form uncaughtException", err);
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
+// Handle uncaught exception
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
 
-  process.exit(1);
+  gracefulShutdown("UNCAUGHT_EXCEPTION");
 });
 
+// Handle termination signals
 process.on("SIGTERM", () => {
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-
-  process.exit(1);
+  gracefulShutdown("SIGTERM");
 });
+
+process.on("SIGINT", () => {
+  gracefulShutdown("SIGINT");
+});
+
+// Start application
+startServer();

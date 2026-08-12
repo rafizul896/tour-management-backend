@@ -17,7 +17,7 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       success_url: `${envVars.SSL.SSL_SUCCESS_BACKEND_URL}?tran_id=${payload.transactionId}&amount=${payload.amount}&status=success`,
       fail_url: `${envVars.SSL.SSL_FAIL_BACKEND_URL}?tran_id=${payload.transactionId}&amount=${payload.amount}&status=fail`,
       cancel_url: `${envVars.SSL.SSL_CANCEL_BACKEND_URL}?tran_id=${payload.transactionId}&amount=${payload.amount}&status=cancel`,
-      ipn_ur: envVars.SSL.SSL_IPN_URL,
+      ipn_url: envVars.SSL.SSL_IPN_URL,
       shipping_method: "N/A",
       product_name: "Tour",
       product_category: "Service",

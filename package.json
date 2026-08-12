@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "npx eslint ./src",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
-    "start": "node ./dist/server.ts",
+    "start": "node ./dist/server.js",
     "build": "npm install --force && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

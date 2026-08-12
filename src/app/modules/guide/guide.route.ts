@@ -29,9 +29,9 @@ router.get(
 );
 
 router.get(
-  "/:id",
-  checkAuth(...Object.values(Role)),
-  GuideControllers.getSingleGuideApplication,
+  "/my-application",
+  checkAuth(Role.USER, Role.GUIDE),
+  GuideControllers.getMyGuideApplication,
 );
 
 router.delete(

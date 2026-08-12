@@ -124,7 +124,7 @@ const successPayment = async (tran_id: string) => {
 
       attachments: [
         {
-          filename: "invoice.pdf",
+          filename: `ExploreBangla-Invoice-${tran_id}.pdf`,
           content: pdfBuffer,
           contentType: "application/pdf",
         },

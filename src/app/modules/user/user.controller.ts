@@ -19,7 +19,7 @@ const createUser = catchAsync(async (req, res, next) => {
 
 const updateUser = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
-  const userData = req.body;
+  const userData = { ...req.body, picture: req.file?.path };
   const verifiedToken = req.user as JwtPayload;
 
   const newUpdatedUser = await UserServices.updateUser(
@@ -37,13 +37,14 @@ const updateUser = catchAsync(async (req, res, next) => {
 });
 
 const getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await UserServices.getAllUsers();
+  const result = await UserServices.getAllUsers(req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "All users retrieved successfully",
-    data: users,
+    data: result.data,
+    meta: result.meta,
   });
 });
 
@@ -67,7 +68,7 @@ const getSingleUser = catchAsync(async (req, res, next) => {
     success: true,
     statusCode: httpStatus.CREATED,
     message: "User Retrieved Successfully",
-    data: user
+    data: user,
   });
 });
 

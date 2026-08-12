@@ -25,12 +25,19 @@ app.use(cookirParser());
 app.use(passport.initialize());
 app.use(passport.session());
 app.set("trust proxy", 1);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://explorebangla.vercel.app",
+];
+
 app.use(
   cors({
-    origin: envVars.FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
+
 
 app.use("/api/v1", router);
 
@@ -44,7 +51,7 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.use(globalErrorHandler);
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;

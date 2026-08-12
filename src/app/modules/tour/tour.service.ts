@@ -97,7 +97,10 @@ export const getAllToursOld = async (query: Record<string, unknown>) => {
 };
 
 const getAllTours = async (query: Record<string, unknown>) => {
-  const queryBuilder = new QueryBuilder(Tour.find(), query);
+  const queryBuilder = new QueryBuilder(
+    Tour.find().populate("division", "name").populate("tourType", "name"),
+    query,
+  );
 
   const tours = await queryBuilder
     .filter()
@@ -116,7 +119,9 @@ const getAllTours = async (query: Record<string, unknown>) => {
 };
 
 const getSingleTour = async (id: string) => {
-  const tour = await Tour.findById(id);
+  const tour = await Tour.findById(id)
+    .populate("division", "name")
+    .populate("tourType", "name");
 
   if (!tour) {
     throw new AppError(httpStatus.BAD_REQUEST, "Tour is not not found!");
@@ -139,6 +144,15 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
     isExisTour.images.length
   ) {
     payload.images = [...payload.images, ...isExisTour.images];
+  }
+
+  if (
+    payload.images &&
+    payload.images.length === 0 &&
+    isExisTour?.images &&
+    isExisTour.images.length
+  ) {
+    payload.images = isExisTour?.images;
   }
 
   if (

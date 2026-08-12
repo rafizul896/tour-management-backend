@@ -19,6 +19,8 @@ const checkAuth =
         const authHeader = req.headers.authorization;
         if (authHeader.startsWith("Bearer ")) {
           accessToken = authHeader.split(" ")[1];
+        } else {
+          accessToken = authHeader;
         }
       }
 
@@ -53,7 +55,7 @@ const checkAuth =
         return next(new AppError(httpStatus.BAD_REQUEST, "User is deleted"));
       }
 
-      if (!isUserExist.isVerified && req.path !== "/send") {
+      if (!isUserExist.isVerified) {
         return next(
           new AppError(httpStatus.BAD_REQUEST, "User is not verified"),
         );

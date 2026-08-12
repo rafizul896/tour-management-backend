@@ -9,18 +9,18 @@ import { envVars } from "../../config/env";
 const credentialsLogin = catchAsync(async (req, res, next) => {
   const logInfo = await AuthServices.credentialsLogin(req.body);
 
+  const isProduction = envVars.NODE_ENV === "production";
+
   res.cookie("accessToken", logInfo.accessToken, {
     httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 7,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   res.cookie("refreshToken", logInfo.refreshToken, {
     httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 30,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   sendResponse(res, {
@@ -34,12 +34,12 @@ const credentialsLogin = catchAsync(async (req, res, next) => {
 const getNewAccessToken = catchAsync(async (req, res, next) => {
   const refreshToken = req.cookies?.refreshToken;
   const tokenInfo = await AuthServices.getNewAccessToken(refreshToken);
+  const isProduction = envVars.NODE_ENV === "production";
 
   res.cookie("accessToken", tokenInfo.accessToken, {
     httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 7,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   sendResponse(res, {
@@ -50,18 +50,17 @@ const getNewAccessToken = catchAsync(async (req, res, next) => {
   });
 });
 
-const logout = catchAsync(async (req, res, next) => {
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
-  });
+const logout = catchAsync(async (req, res) => {
+  const isProduction = envVars.NODE_ENV === "production";
 
-  res.clearCookie("refreshToken", {
+  const cookieOptions = {
     httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
-  });
+    secure: isProduction,
+    sameSite: isProduction ? ("none" as const) : ("lax" as const),
+  };
+
+  res.clearCookie("accessToken", cookieOptions);
+  res.clearCookie("refreshToken", cookieOptions);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -99,8 +98,8 @@ const setPassword = catchAsync(async (req, res, next) => {
 });
 
 const forgotPassword = catchAsync(async (req, res, next) => {
-  const email = req.body.email
- await AuthServices.forgotPassword(email);
+  const email = req.body.email;
+  await AuthServices.forgotPassword(email);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -110,11 +109,10 @@ const forgotPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-
 const resetPassword = catchAsync(async (req, res, next) => {
   const decodedToken = req.user as JwtPayload;
   const payload = req.body;
-  const change = await AuthServices.resetPassword(decodedToken.userId,payload);
+  const change = await AuthServices.resetPassword(decodedToken.userId, payload);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

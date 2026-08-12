@@ -55,9 +55,9 @@ const getAllGuideApplications = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleGuideApplication = catchAsync(async (req, res) => {
-  const id = req.params.id as string;
-  const result = await GuideServices.getSingleGuideApplication(id);
+const getMyGuideApplication = catchAsync(async (req, res) => {
+  const {userId} = req.user as JwtPayload;
+  const result = await GuideServices.getMyGuideApplication(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -83,6 +83,6 @@ export const GuideControllers = {
   applyForGuide,
   updateApplicationStatus,
   getAllGuideApplications,
-  getSingleGuideApplication,
+  getMyGuideApplication,
   softDeleteGuide,
 };
