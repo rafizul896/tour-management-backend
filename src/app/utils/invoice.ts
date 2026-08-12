@@ -10,36 +10,66 @@ export interface IInvoiceData {
   totalAmount: number;
 }
 
-const generatePdf = async (invoiceData: IInvoiceData)=> {
+const generatePdf = async (invoiceData: IInvoiceData): Promise<Buffer> => {
   try {
-    return new Promise<Buffer>((resolve, reject) => {
+    return await new Promise<Buffer>((resolve, reject) => {
       const doc = new PDFDocument({
         margin: 50,
+        size: "A4",
       });
-      const buffer: Uint8Array[] = [];
 
-      doc.on("data", (chunk) => buffer.push(chunk));
+      const buffer: Buffer[] = [];
+
+      doc.on("data", (chunk: Buffer) => {
+        buffer.push(chunk);
+      });
+
       doc.on("end", () => {
         resolve(Buffer.concat(buffer));
       });
+
       doc.on("error", (err) => {
         reject(err);
       });
 
       // =====================================================
-      // HEADER SECTION
+      // COLORS
       // =====================================================
 
-      doc.fillColor("#0F172A").fontSize(28).text("TOUR INVOICE", {
-        align: "center",
-      });
+      const primaryColor = "#F97316";
+      const lightOrange = "#FFF7ED";
+      const darkColor = "#0F172A";
+      const grayColor = "#64748B";
+      const borderColor = "#E2E8F0";
 
-      doc.moveDown(0.5);
+      // =====================================================
+      // HEADER
+      // =====================================================
 
       doc
+        .fillColor(primaryColor)
+        .fontSize(28)
+        .font("Helvetica-Bold")
+        .text("ExploreBangla", {
+          align: "center",
+        });
+
+      doc.moveDown(0.4);
+
+      doc
+        .font("Helvetica")
         .fontSize(12)
-        .fillColor("gray")
-        .text("Thank you for booking with us!", {
+        .fillColor(grayColor)
+        .text("Tour Booking Invoice", {
+          align: "center",
+        });
+
+      doc.moveDown(0.4);
+
+      doc
+        .fontSize(10)
+        .fillColor("#94A3B8")
+        .text("Explore Bangladesh. Discover unforgettable journeys.", {
           align: "center",
         });
 
@@ -48,115 +78,211 @@ const generatePdf = async (invoiceData: IInvoiceData)=> {
       // =====================================================
       // COMPANY INFO
       // =====================================================
-      // COMPANY INFO
-      doc.fillColor("#111827").fontSize(18).text("Travel Agency");
 
       doc
-        .fontSize(12)
-        .fillColor("gray")
-        .text("Dhaka, Bangladesh")
-        .text("support@travelagency.com")
-        .text("+880123456789");
+        .font("Helvetica-Bold")
+        .fontSize(17)
+        .fillColor(darkColor)
+        .text("ExploreBangla");
 
-      // Dynamic Top Position
+      doc
+        .font("Helvetica")
+        .fontSize(10)
+        .fillColor(grayColor)
+        .text("Bangladesh")
+        .text("support@explorebangla.com");
+
+      // =====================================================
+      // INVOICE DETAILS BOX
+      // =====================================================
+
       const invoiceBoxTop = doc.y + 25;
 
-      // INVOICE BOX
       doc
-        .roundedRect(50, invoiceBoxTop, 500, 130, 10)
-        .fillAndStroke("#F8FAFC", "#D1D5DB");
-
-      doc.fillColor("#111827");
-
-      doc.fontSize(14).text("Invoice Details", 70, invoiceBoxTop + 20);
-
-      const formattedDate = new Date(invoiceData.bookingDate).toDateString();
+        .roundedRect(50, invoiceBoxTop, 495, 135, 10)
+        .fillAndStroke(lightOrange, borderColor);
 
       doc
-        .fontSize(12)
-        .fillColor("black")
+        .font("Helvetica-Bold")
+        .fontSize(14)
+        .fillColor(darkColor)
+        .text("Invoice Details", 70, invoiceBoxTop + 20);
+
+      const formattedDate = new Date(
+        invoiceData.bookingDate,
+      ).toLocaleDateString("en-BD", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      // Transaction ID
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(10)
+        .fillColor(darkColor)
         .text("Transaction ID:", 70, invoiceBoxTop + 55);
 
       doc
-        .fillColor("gray")
-        .text(invoiceData.transactionId, 200, invoiceBoxTop + 55);
+        .font("Helvetica")
+        .fillColor(grayColor)
+        .text(invoiceData.transactionId, 190, invoiceBoxTop + 55);
 
-      doc.fillColor("black").text("Booking Date:", 70, invoiceBoxTop + 80);
-
-      doc.fillColor("gray").text(formattedDate, 200, invoiceBoxTop + 80);
-
-      doc.fillColor("black").text("Customer Name:", 70, invoiceBoxTop + 105);
+      // Booking Date
+      doc
+        .font("Helvetica-Bold")
+        .fillColor(darkColor)
+        .text("Booking Date:", 70, invoiceBoxTop + 80);
 
       doc
-        .fillColor("gray")
-        .text(invoiceData.userName, 200, invoiceBoxTop + 105);
-      // =====================================================
-      // TOUR DETAILS TABLE
-      // =====================================================
+        .font("Helvetica")
+        .fillColor(grayColor)
+        .text(formattedDate, 190, invoiceBoxTop + 80);
 
-      doc.moveDown(6);
-
-      const tableTop = 370;
-
-      // TABLE HEADER BG
-      doc.rect(50, tableTop, 500, 30).fill("#2563EB");
+      // Customer Name
+      doc
+        .font("Helvetica-Bold")
+        .fillColor(darkColor)
+        .text("Customer Name:", 70, invoiceBoxTop + 105);
 
       doc
+        .font("Helvetica")
+        .fillColor(grayColor)
+        .text(invoiceData.userName, 190, invoiceBoxTop + 105);
+
+      // =====================================================
+      // TOUR DETAILS
+      // =====================================================
+
+      const tableTop = invoiceBoxTop + 175;
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(14)
+        .fillColor(darkColor)
+        .text("Tour Details", 50, tableTop);
+
+      const headerTop = tableTop + 28;
+
+      // Table Header
+      doc.rect(50, headerTop, 495, 32).fill(primaryColor);
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(10)
         .fillColor("white")
-        .fontSize(12)
-        .text("Tour Package", 70, tableTop + 8)
-        .text("Guests", 300, tableTop + 8)
-        .text("Amount", 430, tableTop + 8);
+        .text("Tour Package", 65, headerTop + 10, {
+          width: 250,
+        })
+        .text("Guests", 330, headerTop + 10, {
+          width: 60,
+          align: "center",
+        })
+        .text("Amount", 420, headerTop + 10, {
+          width: 100,
+          align: "right",
+        });
 
-      // TABLE ROW
-      doc.rect(50, tableTop + 30, 500, 40).stroke("#D1D5DB");
+      // Table Row
+      const rowTop = headerTop + 32;
+
+      doc.rect(50, rowTop, 495, 45).fillAndStroke("#FFFFFF", borderColor);
 
       doc
-        .fillColor("black")
+        .font("Helvetica")
+        .fontSize(10)
+        .fillColor(darkColor)
+        .text(invoiceData.tourTitle, 65, rowTop + 15, {
+          width: 250,
+        })
+        .text(invoiceData.guestCount.toString(), 330, rowTop + 15, {
+          width: 60,
+          align: "center",
+        })
+        .text(
+          `Tk ${invoiceData.totalAmount.toLocaleString("en-BD")}`,
+          420,
+          rowTop + 15,
+          {
+            width: 100,
+            align: "right",
+          },
+        );
+
+      // =====================================================
+      // TOTAL
+      // =====================================================
+
+      const totalTop = rowTop + 75;
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(15)
+        .fillColor(darkColor)
+        .text("Total Amount Paid", 300, totalTop, {
+          width: 130,
+          align: "right",
+        });
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(17)
+        .fillColor(primaryColor)
+        .text(
+          `Tk ${invoiceData.totalAmount.toLocaleString("en-BD")}`,
+          430,
+          totalTop,
+          {
+            width: 115,
+            align: "right",
+          },
+        );
+
+      // =====================================================
+      // PAYMENT STATUS
+      // =====================================================
+
+      const statusTop = totalTop + 45;
+
+      doc.roundedRect(50, statusTop, 495, 40, 8).fill("#F0FDF4");
+
+      doc
+        .font("Helvetica-Bold")
         .fontSize(11)
-        .text(invoiceData.tourTitle, 70, tableTop + 45)
-        .text(invoiceData.guestCount.toString(), 320, tableTop + 45)
-        .text(`$${invoiceData.totalAmount}`, 430, tableTop + 45);
-
-      // =====================================================
-      // TOTAL SECTION
-      // =====================================================
-
-      doc.moveDown(5);
-
-      doc
-        .fontSize(16)
-        .fillColor("#111827")
-        .text(`Total Amount: $${invoiceData.totalAmount}`, 350, tableTop + 100);
+        .fillColor("#166534")
+        .text("Payment Successful", 50, statusTop + 13, {
+          width: 495,
+          align: "center",
+        });
 
       // =====================================================
       // FOOTER
       // =====================================================
 
-      doc.moveDown(6);
-
       doc
-        .fontSize(10)
-        .fillColor("gray")
-        .text("This is a computer generated invoice.", {
+        .font("Helvetica")
+        .fontSize(9)
+        .fillColor("#94A3B8")
+        .text("This is a computer-generated invoice.", 50, 750, {
+          width: 495,
           align: "center",
         });
 
-      doc.text("Thank you for choosing us!", {
+      doc.text("Thank you for choosing ExploreBangla!", 50, 765, {
+        width: 495,
         align: "center",
       });
-
-      // =====================================================
-      // END PDF
-      // =====================================================
 
       doc.end();
     });
   } catch (err) {
     if (err instanceof Error) {
-      console.log(err);
-      throw new AppError(401, `PDF creation error ${err.message}`);
+      console.error("PDF creation error:", err);
+
+      throw new AppError(500, `PDF creation error: ${err.message}`);
     }
+
+    throw new AppError(500, "PDF creation error");
   }
 };
 
