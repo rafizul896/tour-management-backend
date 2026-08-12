@@ -25,7 +25,8 @@ const getAllBookings = catchAsync(async (req, res, next) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "Bookings are retrieved successfully",
-    data: bookings,
+    data: bookings.data,
+    meta: bookings.meta,
   });
 });
 
@@ -44,7 +45,7 @@ const getSingleBooking = catchAsync(async (req, res, next) => {
 
 const getUserBookings = catchAsync(async (req, res, next) => {
   const { userId } = req.user as JwtPayload;
-  const bookings = await BookingService.getUserBookings(userId);
+  const bookings = await BookingService.getUserBookings(userId, req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

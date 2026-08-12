@@ -70,11 +70,13 @@ const updateApplicationStatus = async (id: string, status: GUIDE_STATUS) => {
       { runValidators: true, session },
     );
 
-    await User.findByIdAndUpdate(
-      application.user,
-      { role: Role.GUIDE },
-      { session },
-    );
+    if (status === GUIDE_STATUS.APPROVED) {
+      await User.findByIdAndUpdate(
+        application.user,
+        { role: Role.GUIDE },
+        { session },
+      );
+    }
 
     await session.commitTransaction();
     return res;
@@ -87,7 +89,12 @@ const updateApplicationStatus = async (id: string, status: GUIDE_STATUS) => {
 };
 
 const getAllGuideApplications = async (query: Record<string, unknown>) => {
-  const queryBuilder = new QueryBuilder(Guide.find(), query);
+  const queryBuilder = new QueryBuilder(
+    Guide.find()
+      .populate("user", "name email")
+      .populate("division", "name"),
+    query,
+  );
 
   const data = await queryBuilder.filter().fields().sort().paginate().build();
 
@@ -99,10 +106,9 @@ const getAllGuideApplications = async (query: Record<string, unknown>) => {
   };
 };
 
-const getSingleGuideApplication = async (id: string) => {
+const getMyGuideApplication = async (id: string) => {
   const isExist = await Guide.findOne({
-    _id: id,
-    status: { $ne: "DELETED" },
+    user: id,
   })
     .populate("user", "name email role")
     .populate("division", "name");
@@ -132,6 +138,6 @@ export const GuideServices = {
   applyForGuide,
   updateApplicationStatus,
   getAllGuideApplications,
-  getSingleGuideApplication,
+  getMyGuideApplication,
   softDeleteGuide,
 };

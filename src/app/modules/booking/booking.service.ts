@@ -104,7 +104,7 @@ const getAllBookings = async (query: Record<string, unknown>) => {
   const queryBuilder = new QueryBuilder(
     Booking.find()
       .populate("user", "name email phone address")
-      .populate("tour", "title costFrom")
+      .populate("tour", "title costFrom images")
       .populate("payment"),
     query,
   );
@@ -119,7 +119,7 @@ const getAllBookings = async (query: Record<string, unknown>) => {
   const meta = await queryBuilder.getMeta();
 
   return {
-    bookings,
+    data: bookings,
     meta,
   };
 };
@@ -127,19 +127,37 @@ const getAllBookings = async (query: Record<string, unknown>) => {
 const getSingleBooking = async (id: string) => {
   const booking = await Booking.findById(id)
     .populate("user", "name email phone address")
-    .populate("tour", "title costFrom")
+    .populate("tour", "title costFrom images")
     .populate("payment");
 
   return booking;
 };
 
-const getUserBookings = async (userId: string) => {
-  const bookings = await Booking.find({ user: userId })
-    .populate("user", "name email phone address")
-    .populate("tour", "title costFrom")
-    .populate("payment");
+const getUserBookings = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  const queryBuilder = new QueryBuilder(
+    Booking.find({ user: userId })
+      .populate("user", "name email phone address")
+      .populate("tour", "title costFrom images")
+      .populate("payment"),
+    query,
+  );
 
-  return bookings;
+  const bookings = await queryBuilder
+    .filter()
+    .fields()
+    .sort()
+    .paginate()
+    .build();
+
+  const meta = await queryBuilder.getMeta();
+
+  return {
+    data: bookings,
+    meta,
+  };
 };
 
 const updateBookingStatus = async (id: string, status: BOOKING_STATUS) => {

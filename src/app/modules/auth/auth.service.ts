@@ -163,16 +163,18 @@ const googleCallback = async (
     envVars.JWT_REFRESH_EXPIRES,
   );
 
+  const isProduction = envVars.NODE_ENV === "production";
+
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: envVars.NODE_ENV === "production",
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   return;

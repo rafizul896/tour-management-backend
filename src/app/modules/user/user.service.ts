@@ -4,6 +4,7 @@ import { User } from "./user.model";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcryptjs";
 import { JwtPayload } from "jsonwebtoken";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -83,10 +84,24 @@ const updateUser = async (
   return newUpdatedUser;
 };
 
-const getAllUsers = async () => {
-  const users = User.find({});
+const getAllUsers = async (query: Record<string, unknown>) => {
+  const queryBuilder = new QueryBuilder(User.find(), query);
+  const userSearchableFields = ["name", "email"];
 
-  return users;
+  const data = await queryBuilder
+    .filter()
+    .search(userSearchableFields)
+    .fields()
+    .sort()
+    .paginate()
+    .build();
+
+  const meta = await queryBuilder.getMeta();
+
+  return {
+    data,
+    meta,
+  };
 };
 
 const getMe = async (userId: string) => {
